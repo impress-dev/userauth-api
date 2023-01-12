@@ -28,53 +28,6 @@
   "exec": {
     "steps": [
       {
-        "name": "check_user_table_exists",
-        "module": "dbupdater",
-        "action": "custom",
-        "options": {
-          "connection": "database",
-          "sql": {
-            "query": "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' AND TABLE_NAME = 'users'",
-            "params": []
-          }
-        },
-        "meta": [],
-        "outputType": "array",
-        "output": true
-      },
-      {
-        "name": "",
-        "module": "core",
-        "action": "condition",
-        "options": {
-          "if": "{{check_users_table_exists.length()==0}}",
-          "then": {
-            "steps": [
-              {
-                "name": "log",
-                "module": "core",
-                "action": "setvalue",
-                "options": {
-                  "value": "Needs database reset"
-                },
-                "meta": [],
-                "outputType": "text"
-              },
-              {
-                "name": "",
-                "module": "core",
-                "action": "redirect",
-                "options": {
-                  "url": "/userauth-web/database-reset"
-                },
-                "disabled": true
-              }
-            ]
-          }
-        },
-        "outputType": "boolean"
-      },
-      {
         "name": "",
         "module": "core",
         "action": "condition",
@@ -173,7 +126,24 @@
             "query": "SELECT id, username, password, status\nFROM users\nWHERE username = :P1 /* {{username}} */"
           }
         },
-        "meta": [],
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "username"
+          },
+          {
+            "type": "text",
+            "name": "password"
+          },
+          {
+            "type": "text",
+            "name": "status"
+          }
+        ],
         "outputType": "object"
       },
       {
