@@ -1,0 +1,35 @@
+{
+  "name": "",
+  "module": "core",
+  "action": "condition",
+  "options": {
+    "if": "{{$_ENV.EMAIL_SENDER!=null&&$_ENV.EMAIL_SENDER.length()>0&&$_ENV.EMAIL_SMTP_USER!=null&&$_ENV.EMAIL_SMTP_USER.length()>0&&$_ENV.EMAIL_SMTP_PASSWORD!=null&&$_ENV.EMAIL_SMTP_PASSWORD.length()>0&&$_ENV.EMAIL_SMTP_HOST!=null&&$_ENV.EMAIL_SMTP_HOST.length()>0&&$_ENV.EMAIL_SMTP_PORT!=null&&$_ENV.EMAIL_SMTP_PORT.length()>0}}",
+    "then": {
+      "steps": {
+        "name": "email",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": true
+        },
+        "meta": [],
+        "outputType": "boolean",
+        "output": true
+      }
+    },
+    "else": {
+      "steps": {
+        "name": "email",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": false
+        },
+        "meta": [],
+        "outputType": "boolean",
+        "output": true
+      }
+    }
+  },
+  "outputType": "boolean"
+}

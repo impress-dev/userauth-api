@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "security"
+        }
+      },
+      {
+        "name": "identity",
+        "module": "auth",
+        "action": "identify",
+        "options": {
+          "provider": "security"
+        },
+        "output": true,
+        "meta": []
+      },
+      {
+        "name": "roles",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "user_permissions",
+                "column": "role"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{identity}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user_permissions"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "SELECT role\nFROM user_permissions\nWHERE userid = :P1 /* {{identity}} */",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user_permissions.userid",
+                  "field": "user_permissions.userid",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{identity}}",
+                  "data": {
+                    "table": "user_permissions",
+                    "column": "userid",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "integer",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "userid"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "text",
+            "name": "role"
+          }
+        ],
+        "outputType": "object"
+      }
+    ]
+  }
+}

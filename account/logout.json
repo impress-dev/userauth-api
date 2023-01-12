@@ -1,0 +1,162 @@
+[
+  {
+    "name": "",
+    "module": "auth",
+    "action": "restrict",
+    "options": {
+      "provider": "security",
+      "loginUrl": "{{'/userauth-web/login?return='+$_SERVER.URL+($_SERVER.QUERY_STRING?'?'+$_SERVER.QUERY_STRING.replace('=', '%3D').replace('&', '%26'):'')}}",
+      "forbiddenUrl": "/userauth-web/forbidden"
+    }
+  },
+  {
+    "name": "identity",
+    "module": "auth",
+    "action": "identify",
+    "options": {
+      "provider": "security"
+    },
+    "output": true,
+    "meta": []
+  },
+  {
+    "name": "get_creds",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "database",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "users",
+            "column": "username"
+          }
+        ],
+        "params": [
+          {
+            "operator": "equal",
+            "type": "expression",
+            "name": ":P1",
+            "value": "{{identity}}",
+            "test": ""
+          }
+        ],
+        "table": {
+          "name": "users"
+        },
+        "primary": "id",
+        "joins": [],
+        "wheres": {
+          "condition": "AND",
+          "rules": [
+            {
+              "id": "users.id",
+              "field": "users.id",
+              "type": "double",
+              "operator": "equal",
+              "value": "{{identity}}",
+              "data": {
+                "table": "users",
+                "column": "id",
+                "type": "number",
+                "columnObj": {
+                  "type": "increments",
+                  "default": "",
+                  "primary": true,
+                  "unique": true,
+                  "nullable": false,
+                  "name": "id"
+                }
+              },
+              "operation": "="
+            }
+          ],
+          "conditional": null,
+          "valid": true
+        },
+        "query": "SELECT username\nFROM users\nWHERE id = :P1 /* {{identity}} */"
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "text",
+        "name": "username"
+      }
+    ],
+    "outputType": "object"
+  },
+  {
+    "name": "log_logout",
+    "module": "dbupdater",
+    "action": "insert",
+    "options": {
+      "connection": "database",
+      "sql": {
+        "type": "insert",
+        "values": [
+          {
+            "table": "user_logs",
+            "column": "userid",
+            "type": "number",
+            "value": "{{identity}}"
+          },
+          {
+            "table": "user_logs",
+            "column": "activity",
+            "type": "text",
+            "value": "Logout"
+          },
+          {
+            "table": "user_logs",
+            "column": "data",
+            "type": "text",
+            "value": "{{get_creds.username}}"
+          },
+          {
+            "table": "user_logs",
+            "column": "created",
+            "type": "datetime",
+            "value": "NOW()"
+          }
+        ],
+        "table": "user_logs",
+        "returning": "id",
+        "query": "INSERT INTO user_logs\n(userid, activity, data, created) VALUES (:P1 /* {{identity}} */, 'Logout', :P2 /* {{get_creds.username}} */, 'NOW()')",
+        "params": [
+          {
+            "name": ":P1",
+            "type": "expression",
+            "value": "{{identity}}",
+            "test": ""
+          },
+          {
+            "name": ":P2",
+            "type": "expression",
+            "value": "{{get_creds.username}}",
+            "test": ""
+          }
+        ]
+      }
+    },
+    "meta": [
+      {
+        "name": "identity",
+        "type": "text"
+      },
+      {
+        "name": "affected",
+        "type": "number"
+      }
+    ]
+  },
+  {
+    "name": "",
+    "module": "auth",
+    "action": "logout",
+    "options": {
+      "provider": "security"
+    }
+  }
+]

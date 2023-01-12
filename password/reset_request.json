@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "username"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_ENV.RECAPTCHA_SECRET_KEY!=null&&$_ENV.RECAPTCHA_SECRET_KEY.length()>0}}",
+          "then": {
+            "steps": [
+              {
+                "name": "",
+                "options": {
+                  "comment": "noop"
+                }
+              },
+              {
+                "name": "recaptcha",
+                "module": "recaptcha",
+                "action": "validate",
+                "options": {
+                  "secret": "{{$_ENV.RECAPTCHA_SECRET_KEY}}"
+                },
+                "disabled": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "username",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.username.lowercase()}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "get_creds",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "users",
+                "column": "id"
+              },
+              {
+                "table": "users",
+                "column": "username"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{username}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "users"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "users.username",
+                  "field": "users.username",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{username}}",
+                  "data": {
+                    "table": "users",
+                    "column": "username",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "text",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "username"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT id, username\nFROM users\nWHERE username = :P1 /* {{username}} */"
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "username"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{get_creds.username==username}}",
+          "then": {
+            "steps": [
+              {
+                "name": "insert_password_reset_action",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "user_actions",
+                        "column": "username",
+                        "type": "text",
+                        "value": "{{$_POST.username.lowercase()}}"
+                      },
+                      {
+                        "table": "user_actions",
+                        "column": "key",
+                        "type": "text",
+                        "value": "{{UUID}}"
+                      },
+                      {
+                        "table": "user_actions",
+                        "column": "status",
+                        "type": "text",
+                        "value": "PENDING_PASSWORD_RESET"
+                      },
+                      {
+                        "table": "user_actions",
+                        "column": "created",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      },
+                      {
+                        "table": "user_actions",
+                        "column": "updated",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      }
+                    ],
+                    "table": "user_actions",
+                    "returning": "id",
+                    "query": "INSERT INTO user_actions\n(username, key, status, created, updated) VALUES (:P1 /* {{$_POST.username.lowercase()}} */, :P2 /* {{UUID}} */, 'PENDING_PASSWORD_RESET', 'NOW()', 'NOW()')",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.username.lowercase()}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{UUID}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "get_key",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "SELECT",
+                    "columns": [
+                      {
+                        "table": "user_actions",
+                        "column": "key"
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{insert_password_reset_action.identity}}",
+                        "test": ""
+                      }
+                    ],
+                    "table": {
+                      "name": "user_actions"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "user_actions.id",
+                          "field": "user_actions.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{insert_password_reset_action.identity}}",
+                          "data": {
+                            "table": "user_actions",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "SELECT key\nFROM user_actions\nWHERE id = :P1 /* {{insert_password_reset_action.identity}} */"
+                  }
+                },
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "key"
+                  }
+                ],
+                "outputType": "object"
+              },
+              {
+                "name": "log_valid_password_reset",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "user_logs",
+                        "column": "userid",
+                        "type": "number",
+                        "value": "{{get_creds.id}}"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "activity",
+                        "type": "text",
+                        "value": "Password reset request"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "data",
+                        "type": "text",
+                        "value": ""
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "created",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      }
+                    ],
+                    "table": "user_logs",
+                    "returning": "id",
+                    "query": "INSERT INTO user_logs\n(userid, activity, data, created) VALUES (:P1 /* {{get_creds.id}} */, 'Password reset request', '', 'NOW()')",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{get_creds.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_ENV.EMAIL_SENDER!=null&&$_ENV.EMAIL_SENDER.length()>0&&$_ENV.EMAIL_SMTP_USER!=null&&$_ENV.EMAIL_SMTP_USER.length()>0&&$_ENV.EMAIL_SMTP_PASSWORD!=null&&$_ENV.EMAIL_SMTP_PASSWORD.length()>0&&$_ENV.EMAIL_SMTP_HOST!=null&&$_ENV.EMAIL_SMTP_HOST.length()>0&&$_ENV.EMAIL_SMTP_PORT!=null&&$_ENV.EMAIL_SMTP_PORT.length()>0}}",
+                  "then": {
+                    "steps": {
+                      "name": "",
+                      "module": "mail",
+                      "action": "send",
+                      "options": {
+                        "instance": "mail",
+                        "subject": "Password Reset",
+                        "fromName": "{{$_ENV.EMAIL_SENDER}}",
+                        "fromEmail": "{{$_ENV.EMAIL_SENDER}}",
+                        "toEmail": "{{username}}",
+                        "body": "Please follow the below link to reset your password.\n\n{{$_SERVER.BASE_URL}}/userauth-web/password-reset?key={{get_key.key}}\n"
+                      }
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "log_invalid_password_reset",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "database",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "user_logs",
+                      "column": "activity",
+                      "type": "text",
+                      "value": "Invalid password reset request"
+                    },
+                    {
+                      "table": "user_logs",
+                      "column": "data",
+                      "type": "text",
+                      "value": "{{$_POST.username}}"
+                    },
+                    {
+                      "table": "user_logs",
+                      "column": "created",
+                      "type": "datetime",
+                      "value": "NOW()"
+                    }
+                  ],
+                  "table": "user_logs",
+                  "returning": "id",
+                  "query": "INSERT INTO user_logs\n(activity, data, created) VALUES ('Invalid password reset request', :P1 /* {{$_POST.username}} */, 'NOW()')",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{$_POST.username}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

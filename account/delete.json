@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "userid"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "auth",
+        "action": "restrict",
+        "options": {
+          "provider": "security",
+          "permissions": [
+            "admin"
+          ],
+          "loginUrl": "{{'/userauth-web/login?return='+$_SERVER.URL+($_SERVER.QUERY_STRING?'?'+$_SERVER.QUERY_STRING.replace('=', '%3D').replace('&', '%26'):'')}}",
+          "forbiddenUrl": "/userauth-web/forbidden"
+        },
+        "disabled": true
+      },
+      {
+        "name": "get_creds",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "users",
+                "column": "id"
+              },
+              {
+                "table": "users",
+                "column": "username"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.userid}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "users"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "users.id",
+                  "field": "users.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.userid}}",
+                  "data": {
+                    "table": "users",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "SELECT id, username\nFROM users\nWHERE id = :P1 /* {{$_POST.userid}} */"
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "username"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{get_creds.id==$_POST.userid}}",
+          "then": {
+            "steps": [
+              {
+                "name": "log_account_deleted",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "user_logs",
+                        "column": "userid",
+                        "type": "number",
+                        "value": "{{get_creds.id}}"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "activity",
+                        "type": "text",
+                        "value": "Account deleted"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "data",
+                        "type": "text",
+                        "value": "{{get_creds.username}}"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "created",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      }
+                    ],
+                    "table": "user_logs",
+                    "returning": "id",
+                    "query": "INSERT INTO user_logs\n(userid, activity, data, created) VALUES (:P1 /* {{get_creds.id}} */, 'Account deleted', :P2 /* {{get_creds.username}} */, 'NOW()')",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{get_creds.id}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{get_creds.username}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "delete_account",
+                "module": "dbupdater",
+                "action": "delete",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "delete",
+                    "table": "users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{get_creds.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "DELETE\nFROM users\nWHERE id = :P1 /* {{get_creds.id}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{get_creds.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              }
+            ]
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "log_failed_delete_account",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "user_logs",
+                        "column": "activity",
+                        "type": "text",
+                        "value": "Failed delete account attempt"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "data",
+                        "type": "text",
+                        "value": "{{$_POST.userid}}"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "created",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      }
+                    ],
+                    "table": "user_logs",
+                    "returning": "id",
+                    "query": "INSERT INTO user_logs\n(activity, data, created) VALUES ('Failed delete account attempt', :P1 /* {{$_POST.userid}} */, 'NOW()')",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.userid}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 400,
+                  "data": "Invalid userid"
+                }
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+[
+  {
+    "name": "",
+    "options": {
+      "comment": "Check the account tables have been set up correctly"
+    }
+  },
+  {
+    "name": "check_users_table_exists",
+    "module": "dbupdater",
+    "action": "custom",
+    "options": {
+      "connection": "database",
+      "sql": {
+        "query": "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' AND TABLE_NAME = 'users'",
+        "params": []
+      }
+    },
+    "meta": [
+      {
+        "name": "table_catalog",
+        "type": "text"
+      },
+      {
+        "name": "table_schema",
+        "type": "text"
+      },
+      {
+        "name": "table_name",
+        "type": "text"
+      },
+      {
+        "name": "table_type",
+        "type": "text"
+      },
+      {
+        "name": "self_referencing_column_name",
+        "type": "text"
+      },
+      {
+        "name": "reference_generation",
+        "type": "text"
+      },
+      {
+        "name": "user_defined_type_catalog",
+        "type": "text"
+      },
+      {
+        "name": "user_defined_type_schema",
+        "type": "text"
+      },
+      {
+        "name": "user_defined_type_name",
+        "type": "text"
+      },
+      {
+        "name": "is_insertable_into",
+        "type": "text"
+      },
+      {
+        "name": "is_typed",
+        "type": "text"
+      },
+      {
+        "name": "commit_action",
+        "type": "text"
+      }
+    ],
+    "outputType": "array",
+    "output": true
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "condition",
+    "options": {
+      "if": "{{check_users_table_exists.length()==0}}",
+      "then": {
+        "steps": {
+          "name": "",
+          "module": "core",
+          "action": "redirect",
+          "options": {
+            "url": "/userauth-web/database-reset"
+          }
+        }
+      },
+      "else": {
+        "steps": {
+          "name": "",
+          "module": "auth",
+          "action": "restrict",
+          "options": {
+            "provider": "security",
+            "loginUrl": "{{'/userauth-web/login?return='+$_SERVER.URL+($_SERVER.QUERY_STRING?'?'+$_SERVER.QUERY_STRING.replace('=', '%3D').replace('&', '%26'):'')}}",
+            "forbiddenUrl": "/userauth-web/forbidden"
+          }
+        }
+      }
+    },
+    "outputType": "boolean"
+  }
+]

@@ -1,0 +1,120 @@
+[
+  {
+    "name": "",
+    "options": {
+      "comment": "Check the account tables have been set up correctly"
+    }
+  },
+  {
+    "name": "check_users_table_exists",
+    "module": "dbupdater",
+    "action": "custom",
+    "options": {
+      "connection": "database",
+      "sql": {
+        "query": "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'public' AND TABLE_NAME = 'users'",
+        "params": []
+      }
+    },
+    "meta": [
+      {
+        "name": "table_catalog",
+        "type": "text"
+      },
+      {
+        "name": "table_schema",
+        "type": "text"
+      },
+      {
+        "name": "table_name",
+        "type": "text"
+      },
+      {
+        "name": "table_type",
+        "type": "text"
+      },
+      {
+        "name": "self_referencing_column_name",
+        "type": "text"
+      },
+      {
+        "name": "reference_generation",
+        "type": "text"
+      },
+      {
+        "name": "user_defined_type_catalog",
+        "type": "text"
+      },
+      {
+        "name": "user_defined_type_schema",
+        "type": "text"
+      },
+      {
+        "name": "user_defined_type_name",
+        "type": "text"
+      },
+      {
+        "name": "is_insertable_into",
+        "type": "text"
+      },
+      {
+        "name": "is_typed",
+        "type": "text"
+      },
+      {
+        "name": "commit_action",
+        "type": "text"
+      }
+    ],
+    "outputType": "array"
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "condition",
+    "options": {
+      "if": "{{check_users_table_exists.length()==0}}",
+      "then": {
+        "steps": {
+          "name": "",
+          "module": "core",
+          "action": "redirect",
+          "options": {
+            "url": "/userauth-web/database-reset"
+          }
+        }
+      }
+    },
+    "outputType": "boolean"
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "trycatch",
+    "options": {
+      "try": {
+        "steps": {
+          "name": "identity",
+          "module": "auth",
+          "action": "identify",
+          "options": {
+            "provider": "security"
+          },
+          "output": true,
+          "meta": []
+        }
+      },
+      "catch": {
+        "steps": {
+          "name": "",
+          "module": "core",
+          "action": "response",
+          "options": {
+            "status": 400,
+            "data": "Security provider is missing"
+          }
+        }
+      }
+    }
+  }
+]

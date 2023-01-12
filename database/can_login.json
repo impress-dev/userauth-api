@@ -1,0 +1,77 @@
+[
+  {
+    "name": "",
+    "options": {
+      "comment": "This redirects to login if the users table is not empty. Otherwise it allows a pass through (to the database reset screen)"
+    }
+  },
+  {
+    "name": "",
+    "module": "core",
+    "action": "trycatch",
+    "options": {
+      "try": {
+        "steps": [
+          {
+            "name": "get_user_count",
+            "module": "dbconnector",
+            "action": "single",
+            "options": {
+              "connection": "database",
+              "sql": {
+                "type": "SELECT",
+                "columns": [
+                  {
+                    "table": "users",
+                    "column": "id",
+                    "aggregate": "COUNT"
+                  }
+                ],
+                "params": [],
+                "table": {
+                  "name": "users"
+                },
+                "primary": "id",
+                "joins": [],
+                "groupBy": [],
+                "query": "SELECT COUNT(id)\nFROM users"
+              }
+            },
+            "output": true,
+            "meta": [
+              {
+                "type": "number",
+                "name": "id"
+              }
+            ],
+            "outputType": "object"
+          },
+          {
+            "name": "",
+            "module": "core",
+            "action": "condition",
+            "options": {
+              "if": "{{get_user_count.count>0}}",
+              "then": {
+                "steps": {
+                  "name": "",
+                  "module": "auth",
+                  "action": "restrict",
+                  "options": {
+                    "provider": "security",
+                    "permissions": [
+                      "admin"
+                    ],
+                    "loginUrl": "{{'/userauth-web/login?return='+$_SERVER.URL+($_SERVER.QUERY_STRING?'?'+$_SERVER.QUERY_STRING.replace('=', '%3D').replace('&', '%26'):'')}}",
+                    "forbiddenUrl": "/userauth-web/forbidden"
+                  }
+                }
+              }
+            },
+            "outputType": "boolean"
+          }
+        ]
+      }
+    }
+  }
+]
