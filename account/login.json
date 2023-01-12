@@ -27,6 +27,7 @@
   },
   "exec": {
     "steps": [
+      "lib/userauth-lib/account/login",
       {
         "name": "",
         "module": "core",
@@ -44,7 +45,8 @@
             }
           }
         },
-        "outputType": "boolean"
+        "outputType": "boolean",
+        "disabled": true
       },
       {
         "name": "username",
@@ -54,7 +56,8 @@
           "value": "{{$_POST.username.lowercase()}}"
         },
         "meta": [],
-        "outputType": "text"
+        "outputType": "text",
+        "disabled": true
       },
       {
         "name": "get_creds",
@@ -144,7 +147,8 @@
             "name": "status"
           }
         ],
-        "outputType": "object"
+        "outputType": "object",
+        "disabled": true
       },
       {
         "name": "",
@@ -392,7 +396,8 @@
             }
           }
         },
-        "outputType": "boolean"
+        "outputType": "boolean",
+        "disabled": true
       },
       {
         "name": "identity",
@@ -402,7 +407,8 @@
           "provider": "security"
         },
         "output": true,
-        "meta": []
+        "meta": [],
+        "disabled": true
       },
       {
         "name": "log_valid_login",
@@ -466,7 +472,8 @@
             "name": "affected",
             "type": "number"
           }
-        ]
+        ],
+        "disabled": true
       }
     ]
   },
