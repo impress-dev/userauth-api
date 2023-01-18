@@ -80,7 +80,7 @@
           "module": "core",
           "action": "redirect",
           "options": {
-            "url": "/userauth-web/database-reset"
+            "url": "/userauth/database-reset"
           }
         }
       }
