@@ -129,7 +129,32 @@
                     "query": "SELECT *\nFROM users\nLEFT JOIN user_permissions ON user_permissions.userid = users.id"
                   }
                 },
-                "meta": [],
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "username"
+                  },
+                  {
+                    "type": "text",
+                    "name": "password"
+                  },
+                  {
+                    "type": "text",
+                    "name": "status"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "created"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updated"
+                  }
+                ],
                 "outputType": "object"
               },
               {
@@ -140,15 +165,6 @@
                   "if": "{{get_admins.length()>0}}",
                   "then": {
                     "steps": [
-                      {
-                        "name": "",
-                        "module": "core",
-                        "action": "response",
-                        "options": {
-                          "status": 405,
-                          "data": "About to do restrict"
-                        }
-                      },
                       "lib/userauth/restrict",
                       {
                         "name": "identity",
@@ -222,7 +238,16 @@
                             "query": "SELECT username, password\nFROM users\nWHERE id = :P1 /* {{identity}} */"
                           }
                         },
-                        "meta": [],
+                        "meta": [
+                          {
+                            "type": "text",
+                            "name": "username"
+                          },
+                          {
+                            "type": "text",
+                            "name": "password"
+                          }
+                        ],
                         "outputType": "object"
                       },
                       {
