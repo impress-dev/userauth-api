@@ -23,19 +23,12 @@
           "then": {
             "steps": [
               {
-                "name": "",
-                "options": {
-                  "comment": "noop"
-                }
-              },
-              {
                 "name": "recaptcha",
                 "module": "recaptcha",
                 "action": "validate",
                 "options": {
                   "secret": "{{$_ENV.RECAPTCHA_SECRET_KEY}}"
-                },
-                "disabled": true
+                }
               }
             ]
           }

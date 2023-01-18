@@ -53,19 +53,7 @@
             "options": {
               "if": "{{get_user_count.count>0}}",
               "then": {
-                "steps": {
-                  "name": "",
-                  "module": "auth",
-                  "action": "restrict",
-                  "options": {
-                    "provider": "security",
-                    "permissions": [
-                      "admin"
-                    ],
-                    "loginUrl": "{{'/userauth-web/login?return='+$_SERVER.URL+($_SERVER.QUERY_STRING?'?'+$_SERVER.QUERY_STRING.replace('=', '%3D').replace('&', '%26'):'')}}",
-                    "forbiddenUrl": "/userauth-web/forbidden"
-                  }
-                }
+                "steps": "lib/userauth/restrict"
               }
             },
             "outputType": "boolean"

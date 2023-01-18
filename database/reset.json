@@ -149,19 +149,7 @@
                           "data": "About to do restrict"
                         }
                       },
-                      {
-                        "name": "",
-                        "module": "auth",
-                        "action": "restrict",
-                        "options": {
-                          "provider": "security",
-                          "permissions": [
-                            "admin"
-                          ],
-                          "loginUrl": "/userauth-web/login",
-                          "forbiddenUrl": "/userauth-web/forbidden"
-                        }
-                      },
+                      "lib/userauth/restrict",
                       {
                         "name": "identity",
                         "module": "auth",
