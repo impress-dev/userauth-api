@@ -165,7 +165,7 @@
                   "if": "{{get_admins.length()>0}}",
                   "then": {
                     "steps": [
-                      "lib/userauth/restrict",
+                      "lib/userauth/admin/restrict",
                       {
                         "name": "identity",
                         "module": "auth",

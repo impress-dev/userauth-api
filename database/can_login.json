@@ -53,7 +53,7 @@
             "options": {
               "if": "{{get_user_count.count>0}}",
               "then": {
-                "steps": "lib/userauth/restrict"
+                "steps": "lib/userauth/account/restrict"
               }
             },
             "outputType": "boolean"

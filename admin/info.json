@@ -1,0 +1,38 @@
+[
+  "lib/userauth/admin/restrict",
+  {
+    "name": "users",
+    "module": "dbconnector",
+    "action": "single",
+    "options": {
+      "connection": "database",
+      "sql": {
+        "type": "SELECT",
+        "columns": [
+          {
+            "table": "users",
+            "column": "id",
+            "alias": "count",
+            "aggregate": "COUNT"
+          }
+        ],
+        "params": [],
+        "table": {
+          "name": "users"
+        },
+        "primary": "id",
+        "joins": [],
+        "groupBy": [],
+        "query": "SELECT COUNT(id) AS count\nFROM users"
+      }
+    },
+    "output": true,
+    "meta": [
+      {
+        "type": "number",
+        "name": "count"
+      }
+    ],
+    "outputType": "object"
+  }
+]

@@ -13,7 +13,7 @@
   },
   "exec": {
     "steps": [
-      "lib/userauth/restrict",
+      "lib/userauth/account/restrict",
       {
         "name": "identity",
         "module": "auth",

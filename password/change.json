@@ -23,7 +23,7 @@
   },
   "exec": {
     "steps": [
-      "lib/userauth/restrict",
+      "lib/userauth/account/restrict",
       {
         "name": "",
         "module": "core",
@@ -95,7 +95,7 @@
                 "module": "core",
                 "action": "response",
                 "options": {
-                  "status": 403,
+                  "status": 401,
                   "data": "Old and new password are the same"
                 }
               }
