@@ -236,7 +236,7 @@
                 "module": "core",
                 "action": "redirect",
                 "options": {
-                  "url": "/userauth-web/login"
+                  "url": "/userauth/login"
                 }
               }
             ]
