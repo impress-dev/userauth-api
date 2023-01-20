@@ -21,16 +21,14 @@
         "options": {
           "if": "{{$_ENV.RECAPTCHA_SECRET_KEY!=null&&$_ENV.RECAPTCHA_SECRET_KEY.length()>0}}",
           "then": {
-            "steps": [
-              {
-                "name": "recaptcha",
-                "module": "recaptcha",
-                "action": "validate",
-                "options": {
-                  "secret": "{{$_ENV.RECAPTCHA_SECRET_KEY}}"
-                }
+            "steps": {
+              "name": "recaptcha",
+              "module": "recaptcha",
+              "action": "validate",
+              "options": {
+                "secret": "{{$_ENV.RECAPTCHA_SECRET_KEY}}"
               }
-            ]
+            }
           }
         },
         "outputType": "boolean"
@@ -339,7 +337,7 @@
                         "fromName": "{{$_ENV.EMAIL_SENDER}}",
                         "fromEmail": "{{$_ENV.EMAIL_SENDER}}",
                         "toEmail": "{{username}}",
-                        "body": "Please follow the below link to reset your password.\n\n{{$_SERVER.BASE_URL}}/userauth-web/password-reset?key={{get_key.key}}\n"
+                        "body": "Please follow the below link to reset your password.\n\n{{$_SERVER.BASE_URL}}/userauth/password/reset?key={{get_key.key}}\n"
                       }
                     }
                   }
