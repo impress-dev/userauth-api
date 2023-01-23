@@ -1,38 +1,102 @@
-[
-  "lib/userauth/admin/restrict",
-  {
-    "name": "users",
-    "module": "dbconnector",
-    "action": "single",
-    "options": {
-      "connection": "database",
-      "sql": {
-        "type": "SELECT",
-        "columns": [
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      "lib/userauth/admin/restrict",
+      {
+        "name": "users",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "type": "SELECT",
+            "columns": [
+              {
+                "table": "users",
+                "column": "id",
+                "alias": "count",
+                "aggregate": "COUNT"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "users"
+            },
+            "primary": "id",
+            "joins": [],
+            "groupBy": [],
+            "query": "SELECT COUNT(id) AS count\nFROM users"
+          }
+        },
+        "output": true,
+        "meta": [
           {
-            "table": "users",
-            "column": "id",
-            "alias": "count",
-            "aggregate": "COUNT"
+            "type": "number",
+            "name": "count"
           }
         ],
-        "params": [],
-        "table": {
-          "name": "users"
-        },
-        "primary": "id",
-        "joins": [],
-        "groupBy": [],
-        "query": "SELECT COUNT(id) AS count\nFROM users"
-      }
-    },
-    "output": true,
-    "meta": [
+        "outputType": "object"
+      },
       {
-        "type": "number",
-        "name": "count"
+        "name": "unique_user_logins_last_24_hours",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "query": "SELECT COUNT(DISTINCT(userid)) FROM user_logs WHERE created <= NOW() - INTERVAL '1 DAY' and activity = 'Valid login'",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "count",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "name": "last_10_activities",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "query": "SELECT activity, data, created\nFROM user_logs ORDER BY created DESC LIMIT 50",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "activity",
+            "type": "text"
+          },
+          {
+            "name": "data",
+            "type": "text"
+          },
+          {
+            "name": "created",
+            "type": "datetime"
+          }
+        ],
+        "type": "dbcustom_query",
+        "outputType": "array"
       }
-    ],
-    "outputType": "object"
+    ]
   }
-]
+}
