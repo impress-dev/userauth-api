@@ -99,6 +99,67 @@
           "then": {
             "steps": [
               {
+                "name": "enable_account",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "users",
+                        "column": "status",
+                        "type": "text",
+                        "value": "ENABLED"
+                      },
+                      {
+                        "table": "users",
+                        "column": "updated",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      }
+                    ],
+                    "table": "users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.userid}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "UPDATE users\nSET status = 'ENABLED', updated = 'NOW()'\nWHERE id = :P1 /* {{$_POST.userid}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.userid}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
                 "name": "log_account_enabled",
                 "module": "dbupdater",
                 "action": "insert",
@@ -163,65 +224,12 @@
                 ]
               },
               {
-                "name": "enable_account",
-                "module": "dbupdater",
-                "action": "update",
+                "name": "refresh",
+                "module": "sockets",
+                "action": "refresh",
                 "options": {
-                  "connection": "database",
-                  "sql": {
-                    "type": "update",
-                    "values": [
-                      {
-                        "table": "users",
-                        "column": "status",
-                        "type": "text",
-                        "value": "ENABLED"
-                      },
-                      {
-                        "table": "users",
-                        "column": "updated",
-                        "type": "datetime",
-                        "value": "NOW()"
-                      }
-                    ],
-                    "table": "users",
-                    "wheres": {
-                      "condition": "AND",
-                      "rules": [
-                        {
-                          "id": "id",
-                          "field": "id",
-                          "type": "double",
-                          "operator": "equal",
-                          "value": "{{$_POST.userid}}",
-                          "data": {
-                            "column": "id"
-                          },
-                          "operation": "="
-                        }
-                      ],
-                      "conditional": null,
-                      "valid": true
-                    },
-                    "returning": "id",
-                    "query": "UPDATE users\nSET status = 'ENABLED', updated = 'NOW()'\nWHERE id = :P1 /* {{$_POST.userid}} */",
-                    "params": [
-                      {
-                        "operator": "equal",
-                        "type": "expression",
-                        "name": ":P1",
-                        "value": "{{$_POST.userid}}",
-                        "test": ""
-                      }
-                    ]
-                  }
-                },
-                "meta": [
-                  {
-                    "name": "affected",
-                    "type": "number"
-                  }
-                ]
+                  "action": "userauth/admin/info"
+                }
               }
             ]
           },
@@ -278,6 +286,14 @@
                     "type": "number"
                   }
                 ]
+              },
+              {
+                "name": "refresh1",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
               },
               {
                 "name": "",

@@ -185,6 +185,14 @@
                 ]
               },
               {
+                "name": "refresh",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
+              },
+              {
                 "name": "delete_user_action",
                 "module": "dbupdater",
                 "action": "delete",
@@ -294,6 +302,14 @@
                     "type": "number"
                   }
                 ]
+              },
+              {
+                "name": "refresh1",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
               },
               {
                 "name": "",

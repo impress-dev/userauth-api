@@ -321,6 +321,14 @@
                 ]
               },
               {
+                "name": "refresh",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
+              },
+              {
                 "name": "",
                 "module": "core",
                 "action": "condition",
@@ -347,58 +355,68 @@
             ]
           },
           "else": {
-            "steps": {
-              "name": "log_invalid_password_reset",
-              "module": "dbupdater",
-              "action": "insert",
-              "options": {
-                "connection": "database",
-                "sql": {
-                  "type": "insert",
-                  "values": [
-                    {
-                      "table": "user_logs",
-                      "column": "activity",
-                      "type": "text",
-                      "value": "Invalid password reset request"
-                    },
-                    {
-                      "table": "user_logs",
-                      "column": "data",
-                      "type": "text",
-                      "value": "{{$_POST.username}}"
-                    },
-                    {
-                      "table": "user_logs",
-                      "column": "created",
-                      "type": "datetime",
-                      "value": "NOW()"
-                    }
-                  ],
-                  "table": "user_logs",
-                  "returning": "id",
-                  "query": "INSERT INTO user_logs\n(activity, data, created) VALUES ('Invalid password reset request', :P1 /* {{$_POST.username}} */, 'NOW()')",
-                  "params": [
-                    {
-                      "name": ":P1",
-                      "type": "expression",
-                      "value": "{{$_POST.username}}",
-                      "test": ""
-                    }
-                  ]
-                }
-              },
-              "meta": [
-                {
-                  "name": "identity",
-                  "type": "text"
+            "steps": [
+              {
+                "name": "log_invalid_password_reset",
+                "module": "dbupdater",
+                "action": "insert",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "insert",
+                    "values": [
+                      {
+                        "table": "user_logs",
+                        "column": "activity",
+                        "type": "text",
+                        "value": "Invalid password reset request"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "data",
+                        "type": "text",
+                        "value": "{{$_POST.username}}"
+                      },
+                      {
+                        "table": "user_logs",
+                        "column": "created",
+                        "type": "datetime",
+                        "value": "NOW()"
+                      }
+                    ],
+                    "table": "user_logs",
+                    "returning": "id",
+                    "query": "INSERT INTO user_logs\n(activity, data, created) VALUES ('Invalid password reset request', :P1 /* {{$_POST.username}} */, 'NOW()')",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.username}}",
+                        "test": ""
+                      }
+                    ]
+                  }
                 },
-                {
-                  "name": "affected",
-                  "type": "number"
+                "meta": [
+                  {
+                    "name": "identity",
+                    "type": "text"
+                  },
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "refresh1",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
                 }
-              ]
-            }
+              }
+            ]
           }
         },
         "outputType": "boolean"

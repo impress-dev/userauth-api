@@ -91,6 +91,14 @@
                 ]
               },
               {
+                "name": "refresh",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
+              },
+              {
                 "name": "",
                 "module": "core",
                 "action": "response",
@@ -326,6 +334,14 @@
                     "type": "number"
                   }
                 ]
+              },
+              {
+                "name": "refresh1",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
               }
             ]
           },
@@ -388,6 +404,14 @@
                     "type": "number"
                   }
                 ]
+              },
+              {
+                "name": "refresh2",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
               },
               {
                 "name": "",

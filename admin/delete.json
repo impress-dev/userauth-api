@@ -99,6 +99,53 @@
           "then": {
             "steps": [
               {
+                "name": "delete_account",
+                "module": "dbupdater",
+                "action": "delete",
+                "options": {
+                  "connection": "database",
+                  "sql": {
+                    "type": "delete",
+                    "table": "users",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{get_creds.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "DELETE\nFROM users\nWHERE id = :P1 /* {{get_creds.id}} */",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{get_creds.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
                 "name": "log_account_deleted",
                 "module": "dbupdater",
                 "action": "insert",
@@ -163,51 +210,12 @@
                 ]
               },
               {
-                "name": "delete_account",
-                "module": "dbupdater",
-                "action": "delete",
+                "name": "refresh",
+                "module": "sockets",
+                "action": "refresh",
                 "options": {
-                  "connection": "database",
-                  "sql": {
-                    "type": "delete",
-                    "table": "users",
-                    "wheres": {
-                      "condition": "AND",
-                      "rules": [
-                        {
-                          "id": "id",
-                          "field": "id",
-                          "type": "double",
-                          "operator": "equal",
-                          "value": "{{get_creds.id}}",
-                          "data": {
-                            "column": "id"
-                          },
-                          "operation": "="
-                        }
-                      ],
-                      "conditional": null,
-                      "valid": true
-                    },
-                    "returning": "id",
-                    "query": "DELETE\nFROM users\nWHERE id = :P1 /* {{get_creds.id}} */",
-                    "params": [
-                      {
-                        "operator": "equal",
-                        "type": "expression",
-                        "name": ":P1",
-                        "value": "{{get_creds.id}}",
-                        "test": ""
-                      }
-                    ]
-                  }
-                },
-                "meta": [
-                  {
-                    "name": "affected",
-                    "type": "number"
-                  }
-                ]
+                  "action": "userauth/admin/info"
+                }
               }
             ]
           },
@@ -264,6 +272,14 @@
                     "type": "number"
                   }
                 ]
+              },
+              {
+                "name": "refresh1",
+                "module": "sockets",
+                "action": "refresh",
+                "options": {
+                  "action": "userauth/admin/info"
+                }
               },
               {
                 "name": "",

@@ -589,64 +589,74 @@
                 "action": "trycatch",
                 "options": {
                   "try": {
-                    "steps": {
-                      "name": "log_unauthorized_reset_request",
-                      "module": "dbupdater",
-                      "action": "insert",
-                      "options": {
-                        "connection": "database",
-                        "sql": {
-                          "type": "insert",
-                          "values": [
-                            {
-                              "table": "user_logs",
-                              "column": "activity",
-                              "type": "text",
-                              "value": "Unauthorized database reset request"
-                            },
-                            {
-                              "table": "user_logs",
-                              "column": "data",
-                              "type": "text",
-                              "value": "Incorrect steward password"
-                            },
-                            {
-                              "table": "user_logs",
-                              "column": "created",
-                              "type": "datetime",
-                              "value": "NOW()"
-                            },
-                            {
-                              "table": "user_logs",
-                              "column": "userid",
-                              "type": "number",
-                              "value": "{{identity}}"
-                            }
-                          ],
-                          "table": "user_logs",
-                          "returning": "id",
-                          "query": "INSERT INTO user_logs\n(activity, data, created, userid) VALUES ('Unauthorized database reset request', 'Incorrect steward password', 'NOW()', :P1 /* {{identity}} */)",
-                          "params": [
-                            {
-                              "name": ":P1",
-                              "type": "expression",
-                              "value": "{{identity}}",
-                              "test": ""
-                            }
-                          ]
-                        }
-                      },
-                      "meta": [
-                        {
-                          "name": "identity",
-                          "type": "text"
+                    "steps": [
+                      {
+                        "name": "log_unauthorized_reset_request",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "database",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "user_logs",
+                                "column": "activity",
+                                "type": "text",
+                                "value": "Unauthorized database reset request"
+                              },
+                              {
+                                "table": "user_logs",
+                                "column": "data",
+                                "type": "text",
+                                "value": "Incorrect steward password"
+                              },
+                              {
+                                "table": "user_logs",
+                                "column": "created",
+                                "type": "datetime",
+                                "value": "NOW()"
+                              },
+                              {
+                                "table": "user_logs",
+                                "column": "userid",
+                                "type": "number",
+                                "value": "{{identity}}"
+                              }
+                            ],
+                            "table": "user_logs",
+                            "returning": "id",
+                            "query": "INSERT INTO user_logs\n(activity, data, created, userid) VALUES ('Unauthorized database reset request', 'Incorrect steward password', 'NOW()', :P1 /* {{identity}} */)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{identity}}",
+                                "test": ""
+                              }
+                            ]
+                          }
                         },
-                        {
-                          "name": "affected",
-                          "type": "number"
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "refresh",
+                        "module": "sockets",
+                        "action": "refresh",
+                        "options": {
+                          "action": "userauth/admin/info"
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
                 }
               },
