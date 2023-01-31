@@ -244,7 +244,7 @@
                 "module": "core",
                 "action": "redirect",
                 "options": {
-                  "url": "/userauth/login"
+                  "url": "{{$_ENV.USERAUTH_LOGIN_PAGE?'/'+$_ENV.USERAUTH_LOGIN_PAGE:'/userauth/login'}}"
                 }
               }
             ]
