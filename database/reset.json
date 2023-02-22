@@ -398,7 +398,7 @@
                             "meta": []
                           },
                           {
-                            "name": "drop_permissions_table",
+                            "name": "drop_user_permissions_table",
                             "module": "dbupdater",
                             "action": "custom",
                             "options": {
@@ -411,7 +411,7 @@
                             "meta": []
                           },
                           {
-                            "name": "create_permissions_table",
+                            "name": "create_user_permissions_table",
                             "module": "dbupdater",
                             "action": "custom",
                             "options": {
@@ -422,6 +422,34 @@
                               }
                             },
                             "meta": []
+                          },
+                          {
+                            "name": "drop_user_userkeys_table",
+                            "module": "dbupdater",
+                            "action": "custom",
+                            "options": {
+                              "connection": "database",
+                              "sql": {
+                                "query": "DROP TABLE IF EXISTS user_usedkeys;",
+                                "params": []
+                              }
+                            },
+                            "meta": [],
+                            "outputType": "array"
+                          },
+                          {
+                            "name": "create_user_usedkeys",
+                            "module": "dbupdater",
+                            "action": "custom",
+                            "options": {
+                              "connection": "database",
+                              "sql": {
+                                "query": "CREATE TABLE IF NOT EXISTS user_usedkeys\n(\n    id serial PRIMARY KEY,\n\tkey TEXT,\n\tcreated TIMESTAMP,\n\tupdated TIMESTAMP\n);",
+                                "params": []
+                              }
+                            },
+                            "meta": [],
+                            "outputType": "array"
                           },
                           {
                             "name": "drop_user_logs_table",
