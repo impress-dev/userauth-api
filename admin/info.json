@@ -95,8 +95,30 @@
             "type": "datetime"
           }
         ],
-        "type": "dbcustom_query",
-        "outputType": "array"
+        "type": "dbcustom_query"
+      },
+      {
+        "name": "registrations_by_month",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "query": "SELECT\n    DATE_TRUNC('month', created) as month,\n    COUNT(1) AS count\nFROM\n    users\nGROUP BY\n    DATE_TRUNC('month', created)\nORDER BY\n    DATE_TRUNC('month', created);",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "month",
+            "type": "datetime"
+          },
+          {
+            "name": "count",
+            "type": "number"
+          }
+        ]
       }
     ]
   }
