@@ -104,7 +104,7 @@
         "options": {
           "connection": "database",
           "sql": {
-            "query": "SELECT\n    DATE_TRUNC('month', created) as month,\n    COUNT(1) AS count\nFROM\n    users\nGROUP BY\n    DATE_TRUNC('month', created)\nORDER BY\n    DATE_TRUNC('month', created);",
+            "query": "SELECT u.month, COALESCE(a.count, 0) AS count\nFROM\n(\n    SELECT to_char(generate_series(min(u.created), max(NOW()), '1 month')::date, 'YYYY-MM') AS month FROM users AS u\n) u\nLEFT JOIN\n(\n    SELECT to_char(a.date_agg, 'YYYY-MM') AS date_agg, a.count \n    FROM\n    (\n        SELECT DATE_TRUNC('month', created) AS date_agg, COUNT(1) AS count\n        FROM users\n        GROUP BY DATE_TRUNC('month', created)\n    ) a\n) a\nON a.date_agg = u.month\nORDER BY u.month;",
             "params": []
           }
         },
@@ -112,7 +112,7 @@
         "meta": [
           {
             "name": "month",
-            "type": "datetime"
+            "type": "text"
           },
           {
             "name": "count",
