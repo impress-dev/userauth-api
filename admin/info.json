@@ -145,6 +145,29 @@
         "outputType": "array"
       },
       {
+        "name": "unique_users_by_month_minus_registration_logins",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "database",
+          "sql": {
+            "query": "SELECT u.month, (COALESCE(b.count, 0) - COALESCE(a.count, 0)) AS count\nFROM\n(\n    SELECT to_char(generate_series(min(u.created), max(NOW()+'1 month'), '1 month')::date, 'YYYY-MM') AS month FROM users AS u\n) u\nLEFT JOIN\n(\n    SELECT to_char(a.date_agg, 'YYYY-MM') AS date_agg, a.count \n    FROM\n    (\n\t\tSELECT DATE_TRUNC('month', users.created) AS date_agg, COUNT(1) AS count\n\t\tFROM users\n\t\tLEFT JOIN user_permissions ON user_permissions.userid = users.id\n\t\tWHERE user_permissions.role IS DISTINCT FROM 'admin'\n\t\tGROUP BY DATE_TRUNC('month', users.created)\n    ) a\n) a\nON a.date_agg = u.month\nLEFT JOIN\n(\n    SELECT to_char(a.date_agg, 'YYYY-MM') AS date_agg, COUNT(*) AS count \n    FROM\n    (\n        SELECT DISTINCT DATE_TRUNC('month', user_logs.created) AS date_agg, data\n        FROM user_logs\n\t\tLEFT JOIN user_permissions ON user_permissions.userid = user_logs.userid\n\t\tWHERE user_permissions.role IS DISTINCT FROM 'admin' AND user_logs.activity = 'Valid login'\n    ) a\n    GROUP BY date_agg\n) b\nON b.date_agg = u.month\nORDER BY u.month;\n",
+            "params": []
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "month",
+            "type": "text"
+          },
+          {
+            "name": "count",
+            "type": "number"
+          }
+        ]
+      },
+      {
         "name": "password_reset_requests_by_month",
         "module": "dbupdater",
         "action": "custom",
